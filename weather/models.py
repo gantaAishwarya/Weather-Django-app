@@ -5,9 +5,13 @@ from django.utils.translation import gettext as _
 class CurrentWeather(models.Model):
     class WindDirection(models.TextChoices):
         NORTH = 'N', _('North')
-        SOUTH = 'S', _('South')
+        NORTH_EAST = 'NE', _('North-East')
         EAST = 'E', _('East')
+        SOUTH_EAST = 'SE', _('South-East')
+        SOUTH = 'S', _('South')
+        SOUTH_WEST = 'SW', _('South-West')
         WEST = 'W', _('West')
+        NORTH_WEST = 'NW', _('North-West')
 
     # Using ID as Universal Unique Identifier
     id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
@@ -20,7 +24,7 @@ class CurrentWeather(models.Model):
     wind_speed = models.FloatField(null=True, help_text=_("Wind speed in m/s"))
     wind_direction = models.CharField(
         null=True,
-        max_length=1,
+        max_length=2,  # Updated to support 'NW', 'SE', etc.
         choices=WindDirection.choices,
         help_text=_("Wind direction"),
     )
