@@ -1,0 +1,5 @@
+__pycache__/
+.venv/
+stores/__pycache__/
+demo/__pycache__/
+demo/settings/__pycache__/
