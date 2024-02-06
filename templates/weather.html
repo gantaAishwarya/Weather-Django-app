@@ -1,0 +1,29 @@
+{% load i18n %}
+
+
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Weather App" %}</title>
+</head>
+<body>
+
+
+<!-- Display Current Temperature Values -->
+<div>
+    <h1>{% trans "Current Weather" %}</h1>
+    <p>{% trans "City" %}: {{ current_weather.city }}</p>
+    <p>{% trans "Current Temperature" %}: {{ current_weather.current_temperature }}°C</p>
+    <p>{% trans "Min Temperature" %}: {{ current_weather.min_temperature }}°C</p>
+    <p>{% trans "Max Temperature" %}: {{ current_weather.max_temperature }}°C</p>
+    <p>{% trans "Humidity" %}: {{ current_weather.humidity }}%</p>
+    <p>{% trans "Pressure" %}: {{ current_weather.pressure }} hPa</p>
+    <p>{% trans "Wind Speed" %}: {{ current_weather.wind_speed }} m/s</p>
+    <p>{% trans "Wind Direction" %}: {{ current_weather.wind_direction }}</p>
+    <p>{% trans "Description" %}: {{ current_weather.description }}</p>
+</div>
+
+</body>
+</html>

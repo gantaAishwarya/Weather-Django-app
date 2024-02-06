@@ -1,11 +1,13 @@
+from django import urls
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from django.urls import path, re_path
-from weather.views import weather_info_api 
+from django.urls import include, path, re_path
+from weather.views import weather_info_api, weather_view,configuration,save_config
+import debug_toolbar
 
 # Swagger documentation setup
 schema_view = get_schema_view(
@@ -19,11 +21,16 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
-)
+) 
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
-    path('api/weather', weather_info_api, name='weather-info'),  # Use the function-based view directly
+    path('api/weather/', weather_view, name='weather'),
+    path('api/weather/city', weather_info_api, name='weather-info'),
+    path('api/weather/config/', configuration), 
+    path('api/weather/config/save_config', save_config),
+    path('i18n/', include('django.conf.urls.i18n')),
+    path('__debug__/',include(debug_toolbar.urls)),
     re_path(r'^docs(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^docs/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

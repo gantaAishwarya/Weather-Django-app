@@ -1,0 +1,75 @@
+{% load mathfilters %}
+{% load i18n %}
+<form action="{% url 'set_language' %}" method="post" style="float: right;">
+    {% csrf_token %}
+    <select name="language">
+       {% get_current_language as LANGUAGE_CODE %}
+       {% get_available_languages as LANGUAGES %}
+       {% get_language_info_list for LANGUAGES as languages %}
+       {% for language in languages %}
+         <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+             {{ language.name_local }} ({{ language.code }})
+         </option>
+       {% endfor %}
+    </select>
+    <input type="submit" value="{% trans "select" %}">
+</form>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -moz-transform: translateX(-50%) translateY(-50%);
+            -webkit-transform: translateX(-50%) translateY(-50%);
+            transform: translateX(-50%) translateY(-50%);
+        }
+        .wrap { 
+            width: 100%;
+            padding: 5px 5px 8px 0px;
+            margin: 0 0 5px -5px;
+            font-size: 18px;
+        }
+        .modern-form {
+            width: 500px;
+            margin: 30px auto;
+            background-color:  #fff;
+            border: solid 1px #ccc;
+            padding: 20px 10px;
+        }
+        .combo{
+            padding:10px;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Finder</title>
+</head>
+
+<body>
+ <div class="content">
+    <div style="text-align: center;">
+        <div>
+            <p style="font-size: 24px;"><strong>{% trans "Current Weather Finder" %}</strong></p>
+        </div>
+        <form action="city" method="GET" class="modern-form" style="text-align: center; border: none;">
+            <input type="text" size="50px" name="city" id="city" placeholder="{% trans "Please Enter a City name" %}" style="font-size: 24px; padding: 5px; margin-bottom: 10px; display: block;">
+            <input type="submit" value="{% trans "search" %}" style="font-size: 18px; padding: 10px;">
+        </form>
+         
+    </div>
+    
+  
+
+  <br>
+  <br>
+  <a href='/api/weather/config/'>{% trans "Configure cache time" %}</a>
+ </div>
+</body>
+</html>

@@ -18,4 +18,5 @@ CACHES = {
 CACHE_TTL = 60 * 60 * 2
 
 
+
 ADMIN_URL = "admin/"

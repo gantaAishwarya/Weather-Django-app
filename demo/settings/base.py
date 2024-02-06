@@ -2,10 +2,12 @@ import os
 import environ
 from corsheaders.defaults import default_headers
 from pathlib import Path
+from django.utils.translation import gettext as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 #BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = environ.Path(__file__) - 3
+
 
 #Reading env content
 env = environ.Env()
@@ -41,12 +43,14 @@ DJANGO_APPS  = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'mathfilters',
     "rest_framework.authtoken",
     "corsheaders",
     "django_extensions",
     "django_filters",
     'coreapi',
     'drf_yasg',
+    'debug_toolbar'
 ]
 
 LOCAL_APPS = [
@@ -56,21 +60,25 @@ LOCAL_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
+
 
 ROOT_URLCONF = 'demo.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,6 +86,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
             ],
         },
     },
@@ -96,21 +105,38 @@ WSGI_APPLICATION = 'demo.wsgi.application'
 #     }
 # }
 
-# if env.str("ENVIRONMENT", default="production") == "local":
-#     DATABASES = {
-#     "default": env.db("DATABASE_URL", default="postgres:///ch_demo_db")
-#     }
-# else:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.postgresql",
-#             "NAME": env.str("DJANGO_DATABASE_NAME"),
-#             "USER": env.str("DJANGO_DATABASE_USER"),
-#             "PASSWORD": env.str("DJANGO_DATABASE_PASSWORD"),
-#             "HOST": env.str("DJANGO_DATABASE_HOST"),
-#             "PORT": env.str("DJANGO_DATABASE_PORT", default=5432),
-#         }
-#     }
+#Default cache timeout
+CACHE_TIMEOUT = 300 
+
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379:1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+
+if env.str("ENVIRONMENT", default="production") == "local":
+    DATABASES = {
+    "default": env.db("DATABASE_URL", default="postgres:///ch_demo_db")
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": env.str("DJANGO_DATABASE_NAME"),
+            "USER": env.str("DJANGO_DATABASE_USER"),
+            "PASSWORD": env.str("DJANGO_DATABASE_PASSWORD"),
+            "HOST": env.str("DJANGO_DATABASE_HOST"),
+            "PORT": env.str("DJANGO_DATABASE_PORT", default=5432),
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -134,18 +160,31 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
+
+
+# Set the default language
+
 LANGUAGE_CODE = 'en-us'
+
+LANGUAGES = (
+    ('en-us', 'English'),
+    ('fr', 'French'),
+    ('es', 'Spanish'),
+)
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_L10N = True
 
 SITE_ID = 1
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
 STATIC_ROOT = str(BASE_DIR.path("staticfiles"))
 STATIC_URL = '/static/'
@@ -161,7 +200,7 @@ STATICFILES_FINDERS = [
 
 # CORS SETTINGS
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    "ft-header", # Foodtracker custom header
+    "ch-header", # Foodtracker custom header
     "baggage", # for sentry configuration
     "sentry-trace", # for sentry configuration
 ]
@@ -184,8 +223,8 @@ REST_FRAMEWORK = {
     ),
     # if required, which authentication is eligible?
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.TokenAuthentication",
-        #"rest_framework.authentication.BasicAuthentication",
+        #"rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
     ),
     # input formats the API can handle
     "DEFAULT_PARSER_CLASSES": (
