@@ -1,14 +1,13 @@
 from django.test import TestCase
 from django.urls import reverse
 from unittest.mock import patch
-from weather.views import weather_info_api, get_lat_lon_from_nominatim, cache 
+from weather.views import weather_info_api, cache 
 from demo.settings import base
 
 REST_FRAMEWORK = {}
 
 class WeatherApiTest(TestCase):
 
-    @patch('get_lat_lon_from_nominatim')
     @patch('requests.get')
     @patch('cache.get')
     @patch('cache.set')
@@ -32,7 +31,6 @@ class WeatherApiTest(TestCase):
 
         mock_cache_set.assert_called_once()
 
-    @patch('weather.views.get_lat_lon_from_nominatim')
     @patch('weather.views.requests.get')
     @patch('weather.views.cache.get')
     def test_weather_info_api_cache_hit(self, mock_cache_get, mock_requests_get, mock_get_lat_lon_from_nominatim):
@@ -57,11 +55,9 @@ class WeatherApiTest(TestCase):
         self.assertContains(response, '25.5')
         self.assertNotContains(response, 'Error fetching weather information')
 
-    @patch('weather.views.get_lat_lon_from_nominatim')
     @patch('weather.views.requests.get')
     def test_weather_info_api_error(self, mock_requests_get, mock_get_lat_lon_from_nominatim):
         mock_requests_get.return_value.status_code = 404
-        mock_get_lat_lon_from_nominatim.return_value = (0.0, 0.0)
 
         url = reverse('weather_info_api')
         response = self.client.get(url, {'city': 'InvalidCity'})
