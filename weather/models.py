@@ -24,7 +24,7 @@ class CurrentWeather(models.Model):
     wind_speed = models.FloatField(null=True, help_text=_("Wind speed in m/s"))
     wind_direction = models.CharField(
         null=True,
-        max_length=2,  # Updated to support 'NW', 'SE', etc.
+        max_length=2,
         choices=WindDirection.choices,
         help_text=_("Wind direction"),
     )

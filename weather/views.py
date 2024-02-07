@@ -14,16 +14,21 @@ from django.contrib import messages
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 
+# Function to save configuration settings
 def save_config(request):
+    # Retrieve cache duration from POST data
     cache_duration = request.POST.get('cache_duration')
     if cache_duration:
+        # Update CACHE_TIMEOUT setting if cache duration is provided
         config.CACHE_TIMEOUT = cache_duration
     print(f'cache_timeout set to: {config.CACHE_TIMEOUT}')
     return render(request, 'config.html', {'set_val': int(int(config.CACHE_TIMEOUT) / 60)})
 
+# Function to render configuration page
 def configuration(request):
     return render(request, 'config.html', {'set_val': int(int(config.CACHE_TIMEOUT) / 60)})
 
+# Function to load environment variables from a file
 def load_env(file_path):
     with open(file_path, 'r') as file:
         for line in file:
@@ -31,6 +36,7 @@ def load_env(file_path):
                 key, value = line.strip().split('=', 1)
                 os.environ[key] = value
 
+# Function to retrieve API key from environment variables
 def get_api_key():
         # Reading api key from env content
         BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +45,7 @@ def get_api_key():
         API_KEY = os.getenv("API_KEY")
         return API_KEY
 
+# Function to determine wind direction based on angle
 def get_wind_direction(wind_direction):
     if wind_direction is None:
         return None
@@ -58,7 +65,7 @@ def get_wind_direction(wind_direction):
     
     return None
 
-
+# Function to get latitude and longitude from Nominatim API
 def get_lat_lon_from_nominatim(city):
 
     nominatim_api_url = f"https://nominatim.openstreetmap.org/search.php?q={city}&format=jsonv2"
@@ -77,15 +84,17 @@ def get_lat_lon_from_nominatim(city):
     except requests.exceptions.RequestException as e:
         print(_(f"Error fetching data from Nominatim API: {str(e)}"))
         return None, None
-    
+
+# API view to render the home page    
 @api_view(['GET'])
 def weather_view(request):
     return render(request, 'home.html')
 
+# Function to get cache timeout value
 def get_cache_timeout():
     return config.CACHE_TIMEOUT
 
-
+# API view to fetch weather information
 @cache_page(get_cache_timeout())
 @api_view(['GET'])
 def weather_info_api(request):
